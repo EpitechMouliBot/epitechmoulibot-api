@@ -20,12 +20,12 @@ async function infinitLoopForUserStatus() {
     while (true) {
         await checkStatusUsers("wait");
         await checkStatusUsers("new");
-        await asyncSleep((1000 * 60 ) * 1);
+        await asyncSleep((1000 * 60 ) * 5);
     }
 }
 
 (async () => {
-    infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay
+    infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
 
     app.use('/relay', relayRouter);
     app.use('/api/auth/register', routeRegister);

@@ -4,17 +4,6 @@ import { executeEpitestRequest, executeBDDApiRequest } from '../api';
 
 const relayRouter = express.Router();
 
-// function removeRouteFromEmail(email: string) {
-//     let ret = -84;
-//     app._router.stack.forEach((route: any, i: number, routes: any) => {
-//         if (route.route?.path && route.route?.path.includes(email)) {
-//             routes.splice(i, 1);
-//             ret = 0;
-//         }
-//     });
-//     return (ret);
-// }
-
 relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
     const userList = await executeBDDApiRequest("/user/status/", "ok", 'GET', {}); // a voir si on fait pas un checl recurent tout les X temps dans le main comme actuellement ou juste faire ça chaque fois
     const userInfo = userList.data.find((user: any) => user['email'] === req.params['userEmail']);
