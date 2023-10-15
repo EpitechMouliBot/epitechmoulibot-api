@@ -1,7 +1,6 @@
 require('dotenv').config();
 import axios, { Method } from 'axios';
 import express from "express";
-const app = express();
 
 export async function executeBDDApiRequest(endpoint: string, params: string, method: Method, body: object) {
     const res = await axios({

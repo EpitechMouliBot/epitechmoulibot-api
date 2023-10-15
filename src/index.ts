@@ -1,8 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
+import mysql from "mysql2";
 
-import { checkStatusUsers } from './check_status';
-import { asyncSleep } from './utils';
+import { infinitLoopForUserStatus } from './check_status';
 import relayRouter from './routes/relay';
 import routeLogin from './routes/api/auth/login';
 import routeRegister from './routes/api/auth/register'
@@ -16,16 +16,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.json());
 
-async function infinitLoopForUserStatus() {
-    while (true) {
-        await checkStatusUsers("wait");
-        await checkStatusUsers("new");
-        await asyncSleep((1000 * 60 ) * 5);
-    }
-}
+export const con = mysql.createConnection({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
+});
 
 (async () => {
-    infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
+    con.connect(function (err) {
+        if (err) throw new Error(`Failed to connect to database ${process.env.MYSQL_DATABASE}`);
+        // log.success("Connecté à la base de données " + process.env.MYSQL_DATABASE);
+    });
 
     app.use('/relay', relayRouter);
     app.use('/api/auth/register', routeRegister);
@@ -41,4 +43,6 @@ async function infinitLoopForUserStatus() {
     app.listen(port, host, () => {
         console.log(`epitechmoulibot-api started at http://${host}:${port}`);
     });
+
+    infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
 })();
