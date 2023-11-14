@@ -57,7 +57,7 @@ routeRegister.post("/", async (req: express.Request, res: express.Response) => {
                         let token = jwt.sign({ id: `${rows[0].id}` }, process.env.SECRET, { expiresIn: '40w' });
                         res.status(201).json({ token: token, id: rows[0].id });
                     } else {
-                        res.status(500).json({ msg: "Internal server error - Missing SECRET" });
+                        res.status(500).json({ msg: "Internal server error" });
                     }
                 } else
                     res.sendStatus(404);
