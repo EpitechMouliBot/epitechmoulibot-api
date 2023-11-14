@@ -5,12 +5,12 @@ import { con } from '../../../index';
 
 const routeUser = express.Router();
 
-routeUser.get("/user", verifyToken, async (req: any, res: express.Response) => {
+routeUser.get("/all", verifyToken, async (req: any, res: express.Response) => {
     if (!verifyAuth(req, res, false)) {
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
     }
-    const queryString = (req.token === process.env.OTHER_APP_TOKEN) ? `*` : `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
+    const queryString = `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
     con.query(`SELECT ${queryString} FROM user;`, function (err, rows: any[]) {
         if (err) {
             res.status(500).json({ msg: "Internal server error" });
@@ -23,12 +23,12 @@ routeUser.get("/user", verifyToken, async (req: any, res: express.Response) => {
     });
 });
 
-routeUser.get("/user/status/:status", verifyToken, async (req: any, res: express.Response) => {
+routeUser.get("/status/:status", verifyToken, async (req: any, res: express.Response) => {
     if (!verifyAuth(req, res, false)) {
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
     }
-    const queryString = (req.token === process.env.OTHER_APP_TOKEN) ? `*` : `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
+    const queryString = `id, cookies_status, discord_status, created_at`;
     con.query(`SELECT ${queryString} FROM user WHERE cookies_status = "${req.params.status}";`, function (err, rows: any[]) {
         if (err) {
             res.status(500).json({ msg: "Internal server error" });

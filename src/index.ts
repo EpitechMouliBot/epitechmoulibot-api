@@ -53,7 +53,7 @@ const checkEnvironment = () => {
     app.use('/relay', relayRouter);
     app.use('/api/auth/register', routeRegister);
     app.use('/api/auth/login', routeLogin);
-    app.use('/api/user/user', routeUser);
+    app.use('/api/user', routeUser);
     app.use('/api/user/user_id', routeUserId);
 
     app.get("/", (req, res) => {
