@@ -23,7 +23,30 @@ export const con = mysql.createConnection({
     database: process.env.MYSQL_DATABASE
 });
 
+const checkEnvironment = () => {
+    const requiredEnvVars = [
+        'MYSQL_DATABASE',
+        'HOST_NAME',
+        'PORT',
+        'MYSQL_HOST',
+        'MYSQL_USER',
+        'MYSQL_PASSWORD',
+        'API_DB_HOST',
+        'API_DB_TOKEN',
+        'SECRET',
+        'OTHER_APP_TOKEN',
+        'RELAY_HOST'
+    ];
+    const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+    if (missingEnvVars.length > 0) {
+        console.error(`Missing environment variables: ${missingEnvVars.join(', ')}`);
+        process.exit(84);
+    }
+}
+
 (async () => {
+    checkEnvironment();
+
     con.connect(function (err) {
         if (err) throw new Error(`Failed to connect to database ${process.env.MYSQL_DATABASE}`);
         // log.success("Connecté à la base de données " + process.env.MYSQL_DATABASE);
