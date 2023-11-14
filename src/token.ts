@@ -16,7 +16,11 @@ export function verifyToken(req: any, res: express.Response, next: express.NextF
         }
         try {
             if (process.env.SECRET) {
-                const decoded = jwt.verify(req.token, process.env.SECRET);
+                const decoded = jwt.verify(req.token, process.env.SECRET) as jwt.JwtPayload;
+                if (!decoded || typeof decoded.id !== 'string') {
+                    res.status(403).json({ msg: "Invalid token payload" });
+                    return;
+                }
                 con.query(`SELECT id FROM user WHERE id = "${decoded.id}";`, function (err2: any, rows: any[]) {
                     if (err2) {
                         res.status(500).json({ msg: "Internal server error" });
@@ -39,15 +43,19 @@ export function verifyToken(req: any, res: express.Response, next: express.NextF
 export function get_id_with_token(req: any, res: express.Response) {
     try {
         if (process.env.SECRET) {
-            const decoded = jwt.verify(req.token, process.env.SECRET);
-            return (decoded.id);
+            const decoded = jwt.verify(req.token, process.env.SECRET) as jwt.JwtPayload;
+            if (decoded && typeof decoded.id === 'string') {
+                return decoded.id;
+            } else {
+                res.status(403).json({ msg: "Invalid token payload" });
+            }
         } else {
             res.status(403).json({ msg: "Secret is not valid" });
         }
     } catch (err) {
         res.status(403).json({ msg: "Token is not valid" });
     }
-    return (-1);
+    return -1;
 }
 
 export function verifyAuth(req: any, res: any, verifId: boolean) {
