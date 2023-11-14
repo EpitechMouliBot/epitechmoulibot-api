@@ -2,10 +2,10 @@
   "name": "my-epitech-api",
   "version": "0.1.0",
   "description": "",
-  "main": "out/index.js",
+  "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node src/index.js",
+    "build": "tsc -p tsconfig.json",
+    "start": "node build/index.js",
     "test": "npm install && npm run build && npm start"
   },
   "author": "Norech",
