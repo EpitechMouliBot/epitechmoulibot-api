@@ -9,5 +9,5 @@ export function checkEmail(email: string) {
 }
 
 export function checkPassword(password: string) {
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(password)
+return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*\/])(?=.{8,})/.test(password)
 }

@@ -4,9 +4,13 @@ import { executeEpitestRequest, executeBDDApiRequest } from '../api';
 
 const relayRouter = express.Router();
 
+relayRouter.get('/', (req, res) => {
+    res.send('relay endpoint');
+});
+
 relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
-    const userList = await executeBDDApiRequest("/user/status/", "ok", 'GET', {}); // a voir si on fait pas un checl recurent tout les X temps dans le main comme actuellement ou juste faire ça chaque fois
-    const userInfo = userList.data.find((user: any) => user['email'] === req.params['userEmail']);
+    const userList = await executeBDDApiRequest("/user/status/", "ok", 'GET', {});
+    const userInfo = Array.isArray(userList.data) ? userList.data.find((user: any) => user['email'] === req.params['userEmail']) : undefined;
 
     try {
         let content = await executeEpitestRequest(req, req.params['userEmail']);

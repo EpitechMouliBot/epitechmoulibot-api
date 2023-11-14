@@ -3,9 +3,11 @@ import axios, { Method } from 'axios';
 import express from "express";
 
 export async function executeBDDApiRequest(endpoint: string, params: string, method: Method, body: object) {
+    const host: any = process.env.HOST_NAME;
+    const port: any = process.env.PORT;
     const res = await axios({
         method: method,
-        url: process.env.API_DB_HOST + endpoint + params,
+        url: `http://${host}:${port}` + endpoint + params,
         headers: {
             "Authorization": "Bearer " + process.env.API_DB_TOKEN,
         },

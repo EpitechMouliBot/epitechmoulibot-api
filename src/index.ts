@@ -31,11 +31,9 @@ const checkEnvironment = () => {
         'MYSQL_HOST',
         'MYSQL_USER',
         'MYSQL_PASSWORD',
-        'API_DB_HOST',
         'API_DB_TOKEN',
         'SECRET',
         'OTHER_APP_TOKEN',
-        'RELAY_HOST'
     ];
     const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
     if (missingEnvVars.length > 0) {
@@ -67,5 +65,5 @@ const checkEnvironment = () => {
         console.log(`epitechmoulibot-api started at http://${host}:${port}`);
     });
 
-    infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
+    // infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
 })();

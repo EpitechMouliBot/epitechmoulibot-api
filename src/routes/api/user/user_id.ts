@@ -10,9 +10,11 @@ import { is_num } from '../../../utils';
 const routeUserId = express.Router();
 
 async function executeRelayRequest(method: any, endpoint: string, body = {}) {
+    const host: any = process.env.HOST_NAME;
+    const port: any = process.env.PORT;
     const res = await axios({
         method: method,
-        url: process.env.RELAY_HOST + endpoint,
+        url: `http://${host}:${port}` + endpoint,
         // headers: {
         //     "Authorization": "Bearer " + process.env.API_DB_TOKEN,
         // },
