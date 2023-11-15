@@ -3,27 +3,27 @@ import bcrypt from "bcryptjs";
 import axios, { AxiosRequestConfig } from "axios";
 import { verifyToken, verifyAuth } from '../../../token';
 import { decryptAllCookies } from '../../../crypto';
-import { con } from '../../../index';
+import dbManager from '../../../index';
 import { encryptString } from '../../../crypto';
 import { is_num } from '../../../utils';
 
 const routeUserId = express.Router();
 
-async function executeRelayRequest(method: any, endpoint: string, body = {}) {
-    const host: any = process.env.HOST_NAME;
-    const port: any = process.env.PORT;
-    const res = await axios({
-        method: method,
-        url: `http://${host}:${port}` + endpoint,
-        // headers: {
-        //     "Authorization": "Bearer " + process.env.API_DB_TOKEN,
-        // },
-        data: body
-    }).catch(e => e.response);
-    if (res === undefined)
-        return (false);
-    return res;
-}
+// async function executeRelayRequest(method: any, endpoint: string, body = {}) {
+//     const host: any = process.env.HOST_NAME;
+//     const port: any = process.env.PORT;
+//     const res = await axios({
+//         method: method,
+//         url: `http://${host}:${port}` + endpoint,
+//         // headers: {
+//         //     "Authorization": "Bearer " + process.env.API_DB_TOKEN,
+//         // },
+//         data: body
+//     }).catch(e => e.response);
+//     if (res === undefined)
+//         return (false);
+//     return res;
+// }
 
 function addProperty(queryString: string, property: string, value: string) {
     if (queryString.length > 0)
@@ -65,18 +65,19 @@ routeUserId.get("/user/id/:id", verifyToken, async (req: any, res: express.Respo
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
     }
-    const queryString = (req.token === process.env.OTHER_APP_TOKEN) ? `*` : `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
-    con.query(`SELECT ${queryString} FROM user WHERE id = "${req.params.id}" OR email = "${req.params.id}";`, function (err, rows: any[]) {
-        if (err) {
+
+    dbManager.getUserByEmailOrId(req.token, req.params.id)
+        .then((result) => {
+            if (!result || !result[0]) {
+                res.sendStatus(404);
+            } else {
+                decryptAllCookies(result);
+                res.send(result[0]);
+            }
+        }
+        ).catch((err) => {
             res.status(500).json({ msg: "Internal server error" });
-            // log.error("Internal server error");
-            // log.debug(err, false);
-        } else if (rows[0]) {
-            decryptAllCookies(rows);
-            res.send(rows[0]);
-        } else
-            res.sendStatus(404);
-    });
+        });
 });
 
 routeUserId.put("/user/id/:id", verifyToken, async (req: any, res: express.Response) => {
@@ -95,37 +96,39 @@ routeUserId.put("/user/id/:id", verifyToken, async (req: any, res: express.Respo
         return;
     }
 
-    con.query(`SELECT email FROM user WHERE id = ${req.params.id}`, (err1, oldRows: any[]) => {
-        if (err1) {
-            res.status(500).json({ msg: "Internal server error" });
-            // log.error("Internal server error");
-            // log.debug(err1, false);
-        } else if (oldRows[0]) {
-            con.query(`UPDATE user SET ${updateQueryString} WHERE id = "${req.params.id}";`, (err2, result: any) => {
-                if (err2) {
-                    res.status(500).json({ msg: "Internal server error" });
-                    // log.error("Internal server error");
-                    // log.debug(err2, false);
-                } else if (result.affectedRows > 0) {
-                    const selectQueryString = (req.token === process.env.OTHER_APP_TOKEN) ? `*` : `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
-                    con.query(`SELECT ${selectQueryString} FROM user WHERE id = "${req.params.id}";`, (err3, newRows: any) => {
-                        if (err3) {
-                            res.status(500).json({ msg: "Internal server error" });
-                            // log.error("Internal server error");
-                            // log.debug(err3, false);
-                        } else {
-                            if (req.body.hasOwnProperty('email'))
-                                executeRelayRequest('DELETE', `/account/delete/${oldRows[0].email}`);
-                            decryptAllCookies(newRows);
-                            res.status(200).send(newRows[0]);
-                        }
+    dbManager.getUserByEmailOrId(req.token, req.params.id)
+        .then((result) => {
+            if (!result || !result[0]) {
+                res.sendStatus(404);
+            } else {
+                dbManager.updateUser(req.params.id, updateQueryString)
+                    .then((result1) => {
+                        if (result1.affectedRows > 0) {
+                            dbManager.getUserByEmailOrId(req.token, req.params.id)
+                                .then((result2) => {
+                                    if (!result2 || !result2[0]) {
+                                        res.sendStatus(404);
+                                    } else {
+                                        // if (req.body.hasOwnProperty('email'))
+                                        // executeRelayRequest('DELETE', `/account/delete/${oldRows[0].email}`);
+                                        decryptAllCookies(result2);
+                                        res.status(200).send(result2[0]);
+                                    }
+                                }
+                                ).catch((err2) => {
+                                    res.status(500).json({ msg: "Internal server error" });
+                                });
+                        } else
+                            res.sendStatus(404)
+                    }
+                    ).catch((err1) => {
+                        res.status(500).json({ msg: "Internal server error" });
                     });
-                } else
-                    res.sendStatus(404);
-            });
-        } else
-            res.sendStatus(404);
-    });
+            }
+        }
+        ).catch((err) => {
+            res.status(500).json({ msg: "Internal server error" });
+        });
 });
 
 routeUserId.delete("/user/id/:id", verifyToken, async (req: express.Request, res: express.Response) => {
@@ -137,25 +140,22 @@ routeUserId.delete("/user/id/:id", verifyToken, async (req: express.Request, res
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
     }
-    con.query(`SELECT email FROM user WHERE id = ${req.params.id}`, function (err, rows: any[]) {
-        if (err) {
-            res.status(500).json({ msg: "Internal server error" })
-            // log.error("Internal server error");
-            // log.debug(err, false);
-        } else {
-            con.query(`DELETE FROM user WHERE id = "${req.params.id}";`, function (err2, result: any) {
-                if (err2) {
+    dbManager.getUserById(req.params.id)
+        .then((result) => {
+            dbManager.deleteUser(req.params.id)
+                .then((result1) => {
+                    if (result[0] && result1.affectedRows !== 0) {
+                        res.status(200).json({ msg: `Successfully deleted record number: ${req.params.id}` });
+                    } else
+                        res.sendStatus(404);
+                }
+                ).catch((err1) => {
                     res.status(500).json({ msg: "Internal server error" });
-                    // log.error("Internal server error");
-                    // log.debug(err2, false);
-                } else if (rows[0] && result.affectedRows !== 0) {
-                    executeRelayRequest('DELETE', `/account/delete/${rows[0].email}`);
-                    res.status(200).json({ msg: `Successfully deleted record number: ${req.params.id}` });
-                } else
-                    res.sendStatus(404);
-            });
+                });
         }
-    });
+        ).catch((err) => {
+            res.status(500).json({ msg: "Internal server error" });
+        });
 });
 
 export default routeUserId;

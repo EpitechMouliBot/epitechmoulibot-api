@@ -1,26 +1,34 @@
+import dbManager from '.';
 import { refreshMyEpitechToken } from './get_token';
-import { executeBDDApiRequest } from './api';
-import { asyncSleep } from './utils';
+// import { asyncSleep } from './utils';
+
+async function getUserListByStatus(status: string) {
+    try {
+        const userList = await dbManager.getUserByStatus(status);
+        return { success: true, data: userList };
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
 
 export async function checkStatusUsers(status: string) {
-    const rspList = await executeBDDApiRequest("/user/status/", status, 'GET', {});
-    if (rspList !== undefined && rspList.data !== undefined) {
+    const rspList = await getUserListByStatus(status);
+
+    if (rspList.success != false && rspList.data !== undefined) {
         const userList = rspList.data;
         for (let i = 0, len = userList.length; i < len; ++i) {
             const content = await refreshMyEpitechToken(userList[i]['cookies']);
             if (content === "token_error") {
-                await executeBDDApiRequest("/user/id/", JSON.stringify(userList[i]['id']), 'PUT', { 'cookies_status': 'expired' });
+                dbManager.updateUser(userList[i]['id'], "cookies_status = 'expired'");
             } else {
-                await executeBDDApiRequest("/user/id/", JSON.stringify(userList[i]['id']), 'PUT', { 'cookies_status': 'ok' });
+                dbManager.updateUser(userList[i]['id'], "cookies_status = 'ok'");
             }
         }
     }
 }
 
-export async function infinitLoopForUserStatus() {
-    while (true) {
-        await checkStatusUsers("wait");
-        await checkStatusUsers("new");
-        await asyncSleep((1000 * 60) * 5);
-    }
+export async function handleAllUserStatus() {
+    console.log("?????");
+    await checkStatusUsers("wait");
+    await checkStatusUsers("new");
 }

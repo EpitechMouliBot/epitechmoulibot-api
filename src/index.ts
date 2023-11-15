@@ -1,13 +1,16 @@
 import express from "express";
 import bodyParser from "body-parser";
-import mysql from "mysql2";
 
-import { infinitLoopForUserStatus } from './check_status';
 import relayRouter from './routes/relay';
+import { handleAllUserStatus } from './check_status';
 import routeLogin from './routes/api/auth/login';
 import routeRegister from './routes/api/auth/register'
 import routeUser from './routes/api/user/user';
 import routeUserId from './routes/api/user/user_id'
+
+import DatabaseManager from './callDatabase';
+
+const ONE_MINUTE_IN_MS = 60 * 1000;
 
 require('dotenv').config();
 const app = express();
@@ -15,13 +18,6 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.json());
-
-export const con = mysql.createConnection({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE
-});
 
 const checkEnvironment = () => {
     const requiredEnvVars = [
@@ -42,19 +38,21 @@ const checkEnvironment = () => {
     }
 }
 
-(async () => {
-    checkEnvironment();
+function scheduleTask(task: () => void, interval: number) {
+    task();
+    setInterval(task, interval);
+}
 
-    con.connect(function (err) {
-        if (err) throw new Error(`Failed to connect to database ${process.env.MYSQL_DATABASE}`);
-        // log.success("Connecté à la base de données " + process.env.MYSQL_DATABASE);
-    });
+checkEnvironment();
+const dbManager = new DatabaseManager();
+
+(async () => {
 
     app.use('/relay', relayRouter);
     app.use('/api/auth/register', routeRegister);
     app.use('/api/auth/login', routeLogin);
     app.use('/api/user', routeUser);
-    app.use('/api/user/user_id', routeUserId);
+    app.use('/api/user', routeUserId);
 
     app.get("/", (req, res) => {
         res.send("epitechmoulibot-api online");
@@ -65,5 +63,7 @@ const checkEnvironment = () => {
         console.log(`epitechmoulibot-api started at http://${host}:${port}`);
     });
 
-    // infinitLoopForUserStatus(); // a voir si je garde ou get dans chaque request du relay // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
+    // scheduleTask(() => handleAllUserStatus(), ONE_MINUTE_IN_MS * 5); // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
 })();
+
+export default dbManager;

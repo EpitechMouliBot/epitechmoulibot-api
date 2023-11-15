@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
-import { con } from './index';
+
 import express from "express";
+import dbManager from "./index";
 
 export function verifyToken(req: any, res: express.Response, next: express.NextFunction) {
     const bearerHeader = req.headers['authorization'];
@@ -21,14 +22,16 @@ export function verifyToken(req: any, res: express.Response, next: express.NextF
                     res.status(403).json({ msg: "Invalid token payload" });
                     return;
                 }
-                con.query(`SELECT id FROM user WHERE id = "${decoded.id}";`, function (err2: any, rows: any[]) {
-                    if (err2) {
+                dbManager.checkTokenValidity(decoded.id)
+                    .then((result) => {
+                        if (result)
+                            next();
+                        else
+                            res.status(403).json({ msg: "Token is not valid" });
+                    }
+                    ).catch((err) => {
                         res.status(500).json({ msg: "Internal server error" });
-                    } else if (rows[0] && rows[0].id == decoded.id)
-                        next();
-                    else
-                        res.status(403).json({ msg: "Token is not valid" });
-                });
+                    });
             } else {
                 res.status(403).json({ msg: "Secret is not valid" });
             }

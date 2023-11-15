@@ -1,6 +1,7 @@
 import express from "express";
 import { refreshMyEpitechToken } from '../get_token';
-import { executeEpitestRequest, executeBDDApiRequest } from '../api';
+import { executeEpitestRequest } from '../api';
+import dbManager from "..";
 
 const relayRouter = express.Router();
 
@@ -8,26 +9,38 @@ relayRouter.get('/', (req, res) => {
     res.send('relay endpoint');
 });
 
-relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
-    const userList = await executeBDDApiRequest("/user/status/", "ok", 'GET', {});
-    const userInfo = Array.isArray(userList.data) ? userList.data.find((user: any) => user['email'] === req.params['userEmail']) : undefined;
-
+async function getUserListByStatus(status: string) {
     try {
+        const userList = await dbManager.getUserByStatus(status);
+        return { success: true, data: userList };
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
+relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
+    try {
+        const userList = await getUserListByStatus('new');
+        if (userList.success === false) {
+            res.status(404).send({ message: "User not found" });
+            return;
+        }
+        const userInfo = Array.isArray(userList.data) ? userList.data.find((user: any) => user['email'] === req.params['userEmail']) : undefined;
+        if (!userInfo) {
+            res.status(404).send({ message: "User not found" });
+            return;
+        }
         let content = await executeEpitestRequest(req, req.params['userEmail']);
         if (content.status === 401) {
-            if (userInfo) {
-                const token = await refreshMyEpitechToken(userInfo['cookies']);
-                if (token == "token_error") {
-                    await executeBDDApiRequest("/user/id/", JSON.stringify(userInfo['id']), 'PUT', { 'cookies_status': 'expired' })
-                    res.status(410).send({ message: "Cookies are expired" });
-                    // removeRouteFromEmail(req.params['userEmail']);
-                    return;
-                } else {
-                    content = await executeEpitestRequest(req, token);
-                }
-            } else {
-                res.status(404).send({ message: "User not found" });
+            const token = await refreshMyEpitechToken(userInfo['cookies']);
+            if (token == "token_error") {
+                dbManager.updateUser(userInfo['id'], "cookies_status = 'expired'");
+
+                res.status(410).send({ message: "Cookies are expired" });
+                // removeRouteFromEmail(req.params['userEmail']);
                 return;
+            } else {
+                content = await executeEpitestRequest(req, token);
             }
         }
         res.status(content.status).send(content.data);
