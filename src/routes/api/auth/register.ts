@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import express from "express";
 import dbManager from '../../../index';
-import { checkEmail, checkPassword } from '../../../utils';
+import { checkEmail, checkPassword, generateRandomString } from '../../../utils';
 import { encryptString } from '../../../crypto';
 
 const routeRegister = express.Router();
@@ -38,7 +38,7 @@ routeRegister.post("/", async (req: express.Request, res: express.Response) => {
                 return;
             }
 
-            dbManager.insertUser(req.body["email"], passwordHash, cookiesHash)
+            dbManager.insertUser(req.body["email"], passwordHash, cookiesHash, generateRandomString(10))
                 .then((result1) => {
                     dbManager.getUserByEmail(req.body["email"])
                         .then((result) => {

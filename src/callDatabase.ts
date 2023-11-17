@@ -30,7 +30,7 @@ class DatabaseManager {
     // FUNCTIONS
 
     public getAllUsers(): Promise<any[]> {
-        const queryString = 'id, email, user_id, channel_id, cookies_status, discord_status, created_at';
+        const queryString = 'id, email, discord_user_id, discord_channel_id, phone_topic, last_testRunId, cookies_status, discord_status, phone_status, email_status, created_at';
         const query = `SELECT ${queryString} FROM user;`;
 
         return new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ class DatabaseManager {
     }
 
     public getUserByEmailOrId(token: string, str: string): Promise<any[]> {
-        const queryString = (token === process.env.OTHER_APP_TOKEN) ? `*` : `id, email, user_id, channel_id, cookies_status, discord_status, created_at`;
+        const queryString = (token === process.env.OTHER_APP_TOKEN) ? '*' : 'id, email, discord_user_id, discord_channel_id, phone_topic, last_testRunId, cookies_status, discord_status, phone_status, email_status, created_at';
         const query = `SELECT ${queryString} FROM user WHERE id = "${str}" OR email = "${str}";`;
 
         return new Promise((resolve, reject) => {
@@ -90,7 +90,7 @@ class DatabaseManager {
     }
 
     public getUserByStatus(status: string): Promise<any[]> {
-        const queryString = 'id, email, cookies_status, discord_status, created_at';
+        const queryString = 'id, email, discord_user_id, discord_channel_id, phone_topic, last_testRunId, cookies_status, discord_status, phone_status, email_status, created_at';
         const query = `SELECT ${queryString} FROM user WHERE cookies_status = "${status}";`;
 
         return new Promise((resolve, reject) => {
@@ -104,8 +104,8 @@ class DatabaseManager {
         });
     }
 
-    public insertUser(email: string, passwordHash: string, cookiesHash: string): Promise<any> {
-        const query = `INSERT INTO user(email, password, cookies) VALUES("${email}", "${passwordHash}", '${cookiesHash}')`;
+    public insertUser(email: string, passwordHash: string, cookiesHash: string, phoneTopic: string): Promise<any> {
+        const query = `INSERT INTO user(email, password, cookies, phone_topic) VALUES("${email}", "${passwordHash}", "${cookiesHash}", "${phoneTopic}")`;
 
         return new Promise((resolve, reject) => {
             this.con.query(query, (err, result) => {
