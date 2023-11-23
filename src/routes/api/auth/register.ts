@@ -4,6 +4,7 @@ import express from "express";
 import dbManager from '../../../index';
 import { checkEmail, checkPassword, generateRandomString } from '../../../utils';
 import { encryptString } from '../../../crypto';
+import { checkStatusUsers } from "../../../check_status";
 
 const routeRegister = express.Router();
 
@@ -46,6 +47,7 @@ routeRegister.post("/", async (req: express.Request, res: express.Response) => {
                                 res.status(400).json({ msg: "Invalid Credentials" });
                             } else {
                                 if (process.env.SECRET) {
+                                    checkStatusUsers("new");
                                     let token = jwt.sign({ id: `${result[0].id}` }, process.env.SECRET, { expiresIn: '40w' });
                                     res.status(201).json({ token: token, id: result[0].id });
                                 } else {

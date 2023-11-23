@@ -89,8 +89,10 @@ class DatabaseManager {
         });
     }
 
-    public getUserByStatus(status: string): Promise<any[]> {
-        const queryString = 'id, email, discord_user_id, discord_channel_id, phone_topic, last_testRunId, cookies_status, discord_status, phone_status, email_status, created_at';
+    public getUserByStatus(status: string, queryString: string | null = null): Promise<any[]> {
+        if (!queryString)
+            queryString = 'id, email, discord_user_id, discord_channel_id, phone_topic, last_testRunId, cookies_status, discord_status, phone_status, email_status, created_at';
+
         const query = `SELECT ${queryString} FROM user WHERE cookies_status = "${status}";`;
 
         return new Promise((resolve, reject) => {

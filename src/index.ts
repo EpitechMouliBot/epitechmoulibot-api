@@ -63,7 +63,7 @@ const dbManager = new DatabaseManager();
         console.log(`epitechmoulibot-api started at http://${host}:${port}`);
     });
 
-    // scheduleTask(() => handleAllUserStatus(), ONE_MINUTE_IN_MS * 5); // voir si on fait bien le test deja quand le mec créé son compte ou refresh les cookies
+    scheduleTask(() => handleAllUserStatus(), ONE_MINUTE_IN_MS * 10);
 })();
 
 export default dbManager;

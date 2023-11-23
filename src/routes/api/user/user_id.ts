@@ -60,7 +60,7 @@ function getUpdateQueryString(req: express.Request) {
     return updateQueryString;
 }
 
-routeUserId.get("/get/:id", verifyToken, async (req: any, res: express.Response) => {
+routeUserId.get("/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!verifyAuth(req, res, true)) {
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
@@ -80,7 +80,7 @@ routeUserId.get("/get/:id", verifyToken, async (req: any, res: express.Response)
         });
 });
 
-routeUserId.put("/update/:id", verifyToken, async (req: any, res: express.Response) => {
+routeUserId.put("/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });
         return;
@@ -131,7 +131,7 @@ routeUserId.put("/update/:id", verifyToken, async (req: any, res: express.Respon
         });
 });
 
-routeUserId.delete("/delete/:id", verifyToken, async (req: express.Request, res: express.Response) => {
+routeUserId.delete("/:id", verifyToken, async (req: express.Request, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });
         return;
