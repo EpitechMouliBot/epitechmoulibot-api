@@ -17,7 +17,7 @@ routeUser.get("/all", verifyToken, async (req: any, res: express.Response) => {
             res.send(result);
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 
@@ -33,7 +33,7 @@ routeUser.get("/status/:status", verifyToken, async (req: any, res: express.Resp
             res.send(result);
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 

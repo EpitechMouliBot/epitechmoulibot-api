@@ -76,7 +76,7 @@ routeUserId.get("/user/id/:id", verifyToken, async (req: any, res: express.Respo
             }
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 
@@ -116,18 +116,18 @@ routeUserId.put("/user/id/:id", verifyToken, async (req: any, res: express.Respo
                                     }
                                 }
                                 ).catch((err2) => {
-                                    res.status(500).json({ msg: "Internal server error" });
+                                    res.status(500).json({ msg: "Internal server error", err: err2 });
                                 });
                         } else
                             res.sendStatus(404)
                     }
                     ).catch((err1) => {
-                        res.status(500).json({ msg: "Internal server error" });
+                        res.status(500).json({ msg: "Internal server error", err: err1 });
                     });
             }
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 
@@ -150,11 +150,11 @@ routeUserId.delete("/user/id/:id", verifyToken, async (req: express.Request, res
                         res.sendStatus(404);
                 }
                 ).catch((err1) => {
-                    res.status(500).json({ msg: "Internal server error" });
+                    res.status(500).json({ msg: "Internal server error", err: err1 });
                 });
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 

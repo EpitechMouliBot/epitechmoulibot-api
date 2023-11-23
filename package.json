@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node build/index.js",
-    "test": "npm install && npm run build && npm start"
+    "all": "npm install && npm run build && npm start"
   },
   "author": "Norech",
   "license": "ISC",

@@ -30,7 +30,7 @@ export function verifyToken(req: any, res: express.Response, next: express.NextF
                             res.status(403).json({ msg: "Token is not valid" });
                     }
                     ).catch((err) => {
-                        res.status(500).json({ msg: "Internal server error" });
+                        res.status(500).json({ msg: "Internal server error", err: err });
                     });
             } else {
                 res.status(403).json({ msg: "Secret is not valid" });

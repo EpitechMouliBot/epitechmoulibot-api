@@ -36,7 +36,7 @@ routeLogin.post("/", async (req: express.Request, res: express.Response) => {
                 res.status(403).json({ msg: "Token is not valid" });
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 });
 
