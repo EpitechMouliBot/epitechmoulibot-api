@@ -46,7 +46,7 @@ class DatabaseManager {
 
     public getUserByEmail(email: string): Promise<any[]> {
         const queryString = '*';
-        const query = `SELECT ${queryString} FROM user WHERE email = ${email};`;
+        const query = `SELECT ${queryString} FROM user WHERE email = "${email}";`;
 
         return new Promise((resolve, reject) => {
             this.con.query(query, (err, rows: any[]) => {
@@ -61,7 +61,7 @@ class DatabaseManager {
 
     public getUserById(email: string): Promise<any[]> {
         const queryString = '*';
-        const query = `SELECT ${queryString} FROM user WHERE email = ${email};`;
+        const query = `SELECT ${queryString} FROM user WHERE email = "${email}";`;
 
         return new Promise((resolve, reject) => {
             this.con.query(query, (err, rows: any[]) => {
@@ -105,10 +105,11 @@ class DatabaseManager {
     }
 
     public insertUser(email: string, passwordHash: string, cookiesHash: string, phoneTopic: string): Promise<any> {
-        const query = `INSERT INTO user(email, password, cookies, phone_topic) VALUES("${email}", "${passwordHash}", "${cookiesHash}", "${phoneTopic}")`;
+        const query = 'INSERT INTO user(email, password, cookies, phone_topic) VALUES (?, ?, ?, ?)';
+        const values = [email, passwordHash, cookiesHash, phoneTopic];
 
         return new Promise((resolve, reject) => {
-            this.con.query(query, (err, result) => {
+            this.con.query(query, values, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -119,7 +120,7 @@ class DatabaseManager {
     }
 
     public updateUser(id: string, updateQueryString: string): Promise<any> {
-        const query = `UPDATE user SET ${updateQueryString} WHERE id = ${id};`;
+        const query = `UPDATE user SET ${updateQueryString} WHERE id = "${id}";`;
 
         return new Promise((resolve, reject) => {
             this.con.query(query, (err, result) => {
@@ -133,7 +134,7 @@ class DatabaseManager {
     }
 
     public deleteUser(id: string): Promise<any> {
-        const query = `DELETE FROM user WHERE id = ${id};`;
+        const query = `DELETE FROM user WHERE id = "${id}";`;
 
         return new Promise((resolve, reject) => {
             this.con.query(query, [id], (err, result) => {

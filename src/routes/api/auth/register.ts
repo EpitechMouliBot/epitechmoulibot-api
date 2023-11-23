@@ -58,11 +58,11 @@ routeRegister.post("/", async (req: express.Request, res: express.Response) => {
                         });
                 }
                 ).catch((err) => {
-                    res.status(500).json({ msg: "Internal server error2", err: err });
+                    res.status(500).json({ msg: "Internal server error", err: err });
                 });
         }
         ).catch((err) => {
-            res.status(500).json({ msg: "Internal server error3", err: err });
+            res.status(500).json({ msg: "Internal server error", err: err });
         });
 
 });
