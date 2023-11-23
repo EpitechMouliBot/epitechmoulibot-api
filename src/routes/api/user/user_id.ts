@@ -60,7 +60,7 @@ function getUpdateQueryString(req: express.Request) {
     return updateQueryString;
 }
 
-routeUserId.get("/user/id/:id", verifyToken, async (req: any, res: express.Response) => {
+routeUserId.get("/get/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!verifyAuth(req, res, true)) {
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
         return;
@@ -80,7 +80,7 @@ routeUserId.get("/user/id/:id", verifyToken, async (req: any, res: express.Respo
         });
 });
 
-routeUserId.put("/user/id/:id", verifyToken, async (req: any, res: express.Response) => {
+routeUserId.put("/update/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });
         return;
@@ -131,7 +131,7 @@ routeUserId.put("/user/id/:id", verifyToken, async (req: any, res: express.Respo
         });
 });
 
-routeUserId.delete("/user/id/:id", verifyToken, async (req: express.Request, res: express.Response) => {
+routeUserId.delete("/delete/:id", verifyToken, async (req: express.Request, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });
         return;
@@ -144,7 +144,7 @@ routeUserId.delete("/user/id/:id", verifyToken, async (req: express.Request, res
         .then((result) => {
             dbManager.deleteUser(req.params.id)
                 .then((result1) => {
-                    if (result[0] && result1.affectedRows !== 0) {
+                    if (!result[0] && result1.affectedRows === 1) {
                         res.status(200).json({ msg: `Successfully deleted record number: ${req.params.id}` });
                     } else
                         res.sendStatus(404);
