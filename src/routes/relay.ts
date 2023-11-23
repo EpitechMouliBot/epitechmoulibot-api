@@ -2,6 +2,7 @@ import express from "express";
 import { refreshMyEpitechToken } from '../get_token';
 import { executeEpitestRequest } from '../api';
 import dbManager from "..";
+import { decryptString } from "../crypto";
 
 const relayRouter = express.Router();
 
@@ -11,7 +12,7 @@ relayRouter.get('/', (req, res) => {
 
 async function getUserListByStatus(status: string) {
     try {
-        const userList = await dbManager.getUserByStatus(status);
+        const userList = await dbManager.getUserByStatus(status, "id, email, cookies");
         return { success: true, data: userList };
     } catch (error) {
         return { success: false, error: error };
@@ -20,16 +21,19 @@ async function getUserListByStatus(status: string) {
 
 relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
     try {
-        const userList = await getUserListByStatus('new');
+        const userList = await getUserListByStatus('ok');
         if (userList.success === false) {
             res.status(404).send({ message: "User not found" });
             return;
         }
+
         const userInfo = Array.isArray(userList.data) ? userList.data.find((user: any) => user['email'] === req.params['userEmail']) : undefined;
         if (!userInfo) {
             res.status(404).send({ message: "User not found" });
             return;
         }
+        if (userInfo.cookies)
+            userInfo.cookies = decryptString(userInfo.cookies);
         let content = await executeEpitestRequest(req, req.params['userEmail']);
         if (content.status === 401) {
             const token = await refreshMyEpitechToken(userInfo['cookies']);
