@@ -35,28 +35,37 @@ function addProperty(queryString: string, property: string, value: string) {
 function getUpdateQueryString(req: express.Request) {
     let updateQueryString = "";
 
-    if (req.body.hasOwnProperty('password')) {
-        const passwordHash = bcrypt.hashSync(req.body.password);
-        updateQueryString = addProperty(updateQueryString, 'password', passwordHash);
-    }
-    if (req.body.hasOwnProperty('cookies')) {
-        const cookiesHash = encryptString(req.body.cookies);
-        updateQueryString = addProperty(updateQueryString, 'cookies', cookiesHash);
-    }
     if (req.body.hasOwnProperty('email')) {
         updateQueryString = addProperty(updateQueryString, 'email', req.body.email);
         updateQueryString = addProperty(updateQueryString, 'cookies_status', 'wait');
     }
-    if (req.body.hasOwnProperty('cookies_status') && !req.body.hasOwnProperty('email'))
-        updateQueryString = addProperty(updateQueryString, 'cookies_status', req.body.cookies_status);
-    if (req.body.hasOwnProperty('user_id'))
-        updateQueryString = addProperty(updateQueryString, 'user_id', req.body.user_id);
-    if (req.body.hasOwnProperty('channel_id'))
-        updateQueryString = addProperty(updateQueryString, 'channel_id', req.body.channel_id);
+    if (req.body.hasOwnProperty('password')) {
+        const passwordHash = bcrypt.hashSync(req.body.password);
+        updateQueryString = addProperty(updateQueryString, 'password', passwordHash);
+    }
+    if (req.body.hasOwnProperty('discord_user_id')) {
+        updateQueryString = addProperty(updateQueryString, 'discord_user_id', req.body.discord_user_id);
+    }
+    if (req.body.hasOwnProperty('discord_channel_id')) {
+        updateQueryString = addProperty(updateQueryString, 'discord_channel_id', req.body.discord_channel_id);
+    }
+    if (req.body.hasOwnProperty('phone_topic')) {
+        updateQueryString = addProperty(updateQueryString, 'phone_topic', req.body.phone_topic);
+    }
     if (req.body.hasOwnProperty('last_testRunId'))
         updateQueryString = addProperty(updateQueryString, 'last_testRunId', req.body.last_testRunId);
+    if (req.body.hasOwnProperty('cookies_status') && !req.body.hasOwnProperty('email'))
+    updateQueryString = addProperty(updateQueryString, 'cookies_status', req.body.cookies_status);
     if (req.body.hasOwnProperty('discord_status'))
         updateQueryString = addProperty(updateQueryString, 'discord_status', req.body.discord_status);
+    if (req.body.hasOwnProperty('phone_status'))
+        updateQueryString = addProperty(updateQueryString, 'phone_status', req.body.phone_status);
+    if (req.body.hasOwnProperty('email_status'))
+        updateQueryString = addProperty(updateQueryString, 'email_status', req.body.email_status);
+    if (req.body.hasOwnProperty('cookies')) {
+        const cookiesHash = encryptString(req.body.cookies);
+        updateQueryString = addProperty(updateQueryString, 'cookies', cookiesHash);
+    }
     return updateQueryString;
 }
 
