@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import express from "express";
-import dbManager from '../../../index';
-import { checkEmail, checkPassword } from '../../../utils';
+import dbManager from '../../index';
+import { checkEmail, checkPassword } from '../../utils';
 
 const routeLogin = express.Router();
 
@@ -15,6 +15,54 @@ function error_handling_login(req: express.Request) {
         return false;
     return true;
 }
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Authenticate and log in to an existing account.
+ *     description: Authenticate and log in to an existing user account.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful login
+ *         content:
+ *           application/json:
+ *             example:
+ *               token: "your_access_token"
+ *               id: "user_id"
+ *       400:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Invalid Credentials"
+ *       403:
+ *         description: Forbidden, token is not valid
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Token is not valid"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Internal server error"
+ */
 
 routeLogin.post("/", async (req: express.Request, res: express.Response) => {
     if (!error_handling_login(req)) {

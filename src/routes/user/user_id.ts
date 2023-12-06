@@ -1,29 +1,13 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import axios, { AxiosRequestConfig } from "axios";
-import { verifyToken, verifyAuth } from '../../../token';
-import { decryptAllCookies } from '../../../crypto';
-import dbManager from '../../../index';
-import { encryptString } from '../../../crypto';
-import { is_num } from '../../../utils';
+import { verifyToken, verifyAuth } from '../../token';
+import { decryptAllCookies } from '../../crypto';
+import dbManager from '../../index';
+import { encryptString } from '../../crypto';
+import { is_num } from '../../utils';
 
 const routeUserId = express.Router();
-
-// async function executeRelayRequest(method: any, endpoint: string, body = {}) {
-//     const host: any = process.env.HOST_NAME;
-//     const port: any = process.env.PORT;
-//     const res = await axios({
-//         method: method,
-//         url: `http://${host}:${port}` + endpoint,
-//         // headers: {
-//         //     "Authorization": "Bearer " + process.env.API_DB_TOKEN,
-//         // },
-//         data: body
-//     }).catch(e => e.response);
-//     if (res === undefined)
-//         return (false);
-//     return res;
-// }
 
 function addProperty(queryString: string, property: string, value: string) {
     if (queryString.length > 0)
@@ -55,7 +39,7 @@ function getUpdateQueryString(req: express.Request) {
     if (req.body.hasOwnProperty('last_testRunId'))
         updateQueryString = addProperty(updateQueryString, 'last_testRunId', req.body.last_testRunId);
     if (req.body.hasOwnProperty('cookies_status') && !req.body.hasOwnProperty('email'))
-    updateQueryString = addProperty(updateQueryString, 'cookies_status', req.body.cookies_status);
+        updateQueryString = addProperty(updateQueryString, 'cookies_status', req.body.cookies_status);
     if (req.body.hasOwnProperty('discord_status'))
         updateQueryString = addProperty(updateQueryString, 'discord_status', req.body.discord_status);
     if (req.body.hasOwnProperty('phone_status'))
@@ -68,7 +52,45 @@ function getUpdateQueryString(req: express.Request) {
     }
     return updateQueryString;
 }
-
+/**
+ * @swagger
+ * /user/id/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get information for a specific user by ID.
+ *     description: Get information for a specific user by ID (requires authentication).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user to retrieve.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful retrieval of user information
+ *         content:
+ *           application/json:
+ *             example:
+ *               // Provide an example response if available
+ *       403:
+ *         description: Authorization denied
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Authorization denied"
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Internal server error"
+ */
 routeUserId.get("/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!verifyAuth(req, res, true)) {
         !res.headersSent ? res.status(403).json({ msg: "Authorization denied" }) : 0;
@@ -89,6 +111,80 @@ routeUserId.get("/:id", verifyToken, async (req: any, res: express.Response) => 
         });
 });
 
+/**
+ * @swagger
+ * /user/id/{id}:
+ *   put:
+ *     tags:
+ *       - User
+ *     summary: Update a user by ID.
+ *     description: Update a user by ID (requires authentication).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user to update.
+ *         schema:
+ *           type: string
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         description: The updated user information.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *             password:
+ *               type: string
+ *             discord_user_id:
+ *               type: string
+ *             discord_channel_id:
+ *               type: string
+ *             phone_topic:
+ *               type: string
+ *             last_testRunId:
+ *               type: string
+ *             cookies_status:
+ *               type: string
+ *             discord_status:
+ *               type: string
+ *             phone_status:
+ *               type: string
+ *             email_status:
+ *               type: string
+ *             cookies:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Successful update of the user
+ *         content:
+ *           application/json:
+ *             example:
+ *               // Provide an example response if available
+ *       400:
+ *         description: Bad request, invalid parameter
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Bad parameter"
+ *       403:
+ *         description: Authorization denied
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Authorization denied"
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Internal server error"
+ */
 routeUserId.put("/:id", verifyToken, async (req: any, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });
@@ -118,8 +214,6 @@ routeUserId.put("/:id", verifyToken, async (req: any, res: express.Response) => 
                                     if (!result2 || !result2[0]) {
                                         res.sendStatus(404);
                                     } else {
-                                        // if (req.body.hasOwnProperty('email'))
-                                        // executeRelayRequest('DELETE', `/account/delete/${oldRows[0].email}`);
                                         decryptAllCookies(result2);
                                         res.status(200).send(result2[0]);
                                     }
@@ -140,6 +234,51 @@ routeUserId.put("/:id", verifyToken, async (req: any, res: express.Response) => 
         });
 });
 
+/**
+ * @swagger
+ * /user/id/{id}:
+ *   delete:
+ *     tags:
+ *       - User
+ *     summary: Delete a user by ID.
+ *     description: Delete a user by ID (requires authentication).
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful deletion of the user
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Successfully deleted record number: {id}"
+ *       400:
+ *         description: Bad request, invalid parameter
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Bad parameter"
+ *       403:
+ *         description: Authorization denied
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Authorization denied"
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               msg: "Internal server error"
+ */
 routeUserId.delete("/:id", verifyToken, async (req: express.Request, res: express.Response) => {
     if (!is_num(req.params.id)) {
         res.status(400).json({ msg: "Bad parameter" });

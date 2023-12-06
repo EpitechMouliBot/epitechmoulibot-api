@@ -1,12 +1,10 @@
 import express from "express";
 import bodyParser from "body-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
-import relayRouter from './routes/relay';
 import { handleAllUserStatus } from './check_status';
-import routeLogin from './routes/api/auth/login';
-import routeRegister from './routes/api/auth/register'
-import routeUser from './routes/api/user/user';
-import routeUserId from './routes/api/user/user_id'
+import apiRouter from './routes/router';
 
 import DatabaseManager from './callDatabase';
 
@@ -14,6 +12,35 @@ const ONE_MINUTE_IN_MS = 60 * 1000;
 
 require('dotenv').config();
 const app = express();
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API Documentation',
+            version: '1.0.0',
+            description: 'Documentation for epitechmoulibot API',
+        },
+        tags: [
+            {
+                name: 'Auth',
+                description: 'Endpoints for user authentication',
+            },
+            {
+                name: 'User',
+                description: 'Endpoints for user information',
+            },
+            {
+                name: 'Relay',
+                description: 'Endpoints for relaying requests to other services',
+            },
+        ],
+    },
+    apis: ['./src/routes/**/*.ts'],
+};
+
+const specs = swaggerJsdoc(options);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -48,11 +75,7 @@ const dbManager = new DatabaseManager();
 
 (async () => {
 
-    app.use('/relay', relayRouter);
-    app.use('/api/auth/register', routeRegister);
-    app.use('/api/auth/login', routeLogin);
-    app.use('/api/user', routeUser);
-    app.use('/api/user', routeUserId);
+    app.use('/', apiRouter);
 
     app.get("/", (req, res) => {
         res.send("epitechmoulibot-api online");
