@@ -21,6 +21,19 @@ const options = {
             version: '1.0.0',
             description: 'Documentation for epitechmoulibot API',
         },
+        servers: [
+            { url: '{protocol}://{environment}', variables: {
+                protocol: {
+                    default: 'https',
+                    enum: ['https', 'http'],
+                },
+                environment: {
+                    default: 'epitechmoulibot.thomasott.fr/api',
+                    enum: ['epitechmoulibot.thomasott.fr/api', '127.0.0.1:3500'],
+                },
+            }, },
+
+        ],
         tags: [
             {
                 name: 'Auth',
@@ -35,8 +48,22 @@ const options = {
                 description: 'Endpoints for relaying requests to other services',
             },
         ],
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+        security: [
+            {
+                BearerAuth: ['read', 'write'],
+            },
+        ],
     },
-    apis: ['./src/routes/**/*.ts'],
+    apis: [__filename, './src/routes/**/*.ts'],
 };
 
 const specs = swaggerJsdoc(options);
@@ -77,6 +104,21 @@ const dbManager = new DatabaseManager();
 
     app.use('/', apiRouter);
 
+    /**
+     * @swagger
+     * /:
+     *   get:
+     *     summary: Check if the API is online.
+     *     description: Check if the API is online.
+     *     security: []
+     *     responses:
+     *       200:
+     *         description: Successful Epitech API request
+     *         content:
+     *           application/json:
+     *             example:
+     *               epitechmoulibot-api online
+     */
     app.get("/", (req, res) => {
         res.send("epitechmoulibot-api online");
     });

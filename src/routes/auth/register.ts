@@ -31,6 +31,7 @@ function error_handling_register(req: express.Request) {
  *       - Auth
  *     summary: Register a new user account.
  *     description: Register a new user account with the provided credentials.
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

@@ -23,6 +23,7 @@ async function getUserListByStatus(status: string) {
  *       - Relay
  *     summary: Get information from Epitech API using user's credentials.
  *     description: Get information from the Epitech API using the user's credentials.
+ *     security: []
  *     parameters:
  *       - in: path
  *         name: userEmail

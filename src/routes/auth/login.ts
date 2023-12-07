@@ -24,6 +24,7 @@ function error_handling_login(req: express.Request) {
  *       - Auth
  *     summary: Authenticate and log in to an existing account.
  *     description: Authenticate and log in to an existing user account.
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -63,7 +64,6 @@ function error_handling_login(req: express.Request) {
  *             example:
  *               msg: "Internal server error"
  */
-
 routeLogin.post("/", async (req: express.Request, res: express.Response) => {
     if (!error_handling_login(req)) {
         res.status(400).json({ msg: "Invalid Credentials" });

@@ -1,6 +1,5 @@
 import express from "express";
 import bcrypt from "bcryptjs";
-import axios, { AxiosRequestConfig } from "axios";
 import { verifyToken, verifyAuth } from '../../token';
 import { decryptAllCookies } from '../../crypto';
 import dbManager from '../../index';
