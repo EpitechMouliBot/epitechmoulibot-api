@@ -98,7 +98,7 @@ relayRouter.get('/:userEmail/epitest/*', async (req, res) => {
         }
         res.status(content.status).send(content.data);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).send("Relay error");
     }
 });
