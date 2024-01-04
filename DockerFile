@@ -1,8 +1,15 @@
 FROM node:19-alpine
+
 WORKDIR /app/epitechmoulibot-api
+
 RUN apt-get update && apt-get install chromium -y
+
 COPY . /app/epitechmoulibot-api
+
 RUN npm install
+
 RUN npm run build
+
 EXPOSE $PORT
+
 CMD ["npm", "start"]

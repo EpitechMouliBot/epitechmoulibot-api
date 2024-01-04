@@ -1,7 +1,6 @@
 import dbManager from '.';
 import { decryptString } from './crypto';
 import { refreshMyEpitechToken } from './get_token';
-// import { asyncSleep } from './utils';
 
 async function getUserListByStatus(status: string) {
     try {
